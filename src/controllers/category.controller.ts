@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { expense_category_model } from '../models';
+import { expense_category_model, user_expense_model } from '../models';
 import { send_success, send_error, send_not_found } from '../utils/response';
 import { find_similar_strings } from '../utils/fuzzy_match';
 
@@ -13,7 +13,20 @@ export const get_categories = async (req: Request, res: Response): Promise<void>
       .find({ user_id })
       .sort({ created_at: -1 });
 
-    send_success(res, categories, 'Categories retrieved successfully');
+    // Get expense count for each category
+    const categories_with_count = await Promise.all(
+      categories.map(async (category) => {
+        const expense_count = await user_expense_model.countDocuments({
+          category_id: category.category_id,
+        });
+        return {
+          ...category.toObject(),
+          expense_count,
+        };
+      })
+    );
+
+    send_success(res, categories_with_count, 'Categories retrieved successfully');
   } catch (error) {
     send_error(res, (error as Error).message, 'Failed to fetch categories');
   }
