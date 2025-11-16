@@ -6,6 +6,10 @@ export interface user_profile {
   user_name: string;
   user_email: string;
   user_phone?: string;
+  google_id?: string;
+  profile_picture?: string;
+  auth_provider?: 'google' | 'email';
+  is_first_login?: boolean;
   created_at: Date;
   updated_at: Date;
 }
