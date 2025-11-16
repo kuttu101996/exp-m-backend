@@ -23,7 +23,7 @@ passport.use(
       callbackURL: `${config.api_base_url}/auth/google/callback`,
       scope: ['profile', 'email'],
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (_accessToken, _refreshToken, profile, done) => {
       try {
         // Extract user info from Google profile
         const google_id = profile.id;

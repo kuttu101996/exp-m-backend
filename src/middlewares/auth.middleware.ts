@@ -78,7 +78,7 @@ export const verify_token = async (
  */
 export const optional_auth = async (
   req: auth_request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {

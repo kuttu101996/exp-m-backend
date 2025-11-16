@@ -50,21 +50,21 @@ router.get(
  * @desc    Get current user profile
  * @access  Private (requires JWT token)
  */
-router.get('/me', verify_token, get_current_user);
+router.get('/me', verify_token as any, get_current_user as any);
 
 /**
  * @route   POST /auth/setup-defaults
  * @desc    Setup default categories for new user
  * @access  Private (requires JWT token)
  */
-router.post('/setup-defaults', verify_token, setup_default_categories);
+router.post('/setup-defaults', verify_token as any, setup_default_categories as any);
 
 /**
  * @route   POST /auth/complete-first-login
  * @desc    Mark user's first login as complete
  * @access  Private (requires JWT token)
  */
-router.post('/complete-first-login', verify_token, complete_first_login);
+router.post('/complete-first-login', verify_token as any, complete_first_login as any);
 
 /**
  * @route   POST /auth/logout
@@ -78,14 +78,14 @@ router.post('/logout', logout);
  * @desc    Refresh JWT token
  * @access  Private (requires valid JWT token)
  */
-router.post('/refresh', verify_token, refresh_token);
+router.post('/refresh', verify_token as any, refresh_token as any);
 
 /**
  * @route   GET /auth/error
  * @desc    OAuth error page
  * @access  Public
  */
-router.get('/error', (req, res) => {
+router.get('/error', (_req, res) => {
   res.status(401).json({
     success: false,
     message: 'Authentication failed',

@@ -13,8 +13,8 @@ import { DEFAULT_CATEGORIES } from '../utils/default_categories';
 const generate_token = (user_id: string, email: string): string => {
   return jwt.sign(
     { user_id, email },
-    config.jwt_secret,
-    { expiresIn: config.jwt_expiration }
+        config.jwt_secret as string,
+    { expiresIn: config.jwt_expiration as string }
   );
 };
 
