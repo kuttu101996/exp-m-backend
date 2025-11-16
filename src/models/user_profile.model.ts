@@ -29,6 +29,25 @@ const user_profile_schema = new Schema<user_profile_document>(
       type: String,
       trim: true,
     },
+    google_id: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null values, unique only when present
+      index: true,
+    },
+    profile_picture: {
+      type: String,
+      trim: true,
+    },
+    auth_provider: {
+      type: String,
+      enum: ['google', 'email'],
+      default: 'google',
+    },
+    is_first_login: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
@@ -38,6 +57,7 @@ const user_profile_schema = new Schema<user_profile_document>(
 
 // Indexes for better query performance
 user_profile_schema.index({ user_email: 1 });
+user_profile_schema.index({ google_id: 1 });
 
 export const user_profile_model = mongoose.model<user_profile_document>(
   'user_profile',

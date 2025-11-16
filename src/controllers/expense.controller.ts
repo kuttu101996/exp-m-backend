@@ -7,7 +7,7 @@ import { send_success, send_error, send_not_found } from '../utils/response';
 export const get_expenses = async (req: Request, res: Response): Promise<void> => {
   try {
     const { user_id } = req.params;
-    const { start_date, end_date, category_id, sub_category_id, page = 1, page_size = 50 } = req.query;
+    const { start_date, end_date, category_id, sub_category_id, page = 1, page_size = 30 } = req.query;
 
     const query: any = { user_id };
 
