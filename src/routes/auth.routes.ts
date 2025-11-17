@@ -36,11 +36,19 @@ router.get(
  * Passport middleware handles the OAuth code exchange
  * Then our controller generates JWT and redirects to frontend
  */
+// router.get(
+//   '/google/callback',
+//   passport.authenticate('google', {
+//     session: true,
+//     failureRedirect: '/auth/error',
+//   }),
+//   google_callback
+// );
 router.get(
   '/google/callback',
   passport.authenticate('google', {
     session: true,
-    failureRedirect: '/auth/error',
+    failureRedirect: '/api/v1/auth/failure', // Redirect to our custom error handler
   }),
   google_callback
 );
@@ -79,6 +87,16 @@ router.post('/logout', logout);
  * @access  Private (requires valid JWT token)
  */
 router.post('/refresh', verify_token as any, refresh_token as any);
+
+/**
+ * @route   GET /auth/failure
+ * @desc    OAuth failure handler - redirects to frontend with error
+ * @access  Public
+ */
+router.get('/failure', (_req, res) => {
+  const { config } = require('../config/env');
+  res.redirect(`${config.frontend_url}/auth/error?message=authentication_failed`);
+});
 
 /**
  * @route   GET /auth/error
