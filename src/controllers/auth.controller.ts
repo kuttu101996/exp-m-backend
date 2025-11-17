@@ -63,7 +63,8 @@ export const google_callback = async (req: Request, res: Response): Promise<void
     const redirect_url = user.is_first_login
       ? `${config.frontend_url}/auth/success?token=${token}&firstLogin=true`
       : `${config.frontend_url}/auth/success?token=${token}`;
-
+    console.log("google_callback log - ", redirect_url)
+      
     res.redirect(redirect_url);
   } catch (error) {
     console.error('❌ Google callback error:', error);
