@@ -100,7 +100,7 @@ router.get('/failure', (_req, res) => {
 
 /**
  * @route   GET /auth/error
- * @desc    OAuth error page
+ * @desc    OAuth error page (legacy)
  * @access  Public
  */
 router.get('/error', (_req, res) => {

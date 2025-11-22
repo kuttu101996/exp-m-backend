@@ -1,6 +1,12 @@
 // Shared TypeScript types for the entire application
 // All fields use snake_case naming convention
 
+// Category type enum
+export type category_type = 'income' | 'expense';
+
+// Income source type enum
+// export type income_source_type = 'salary' | 'freelance' | 'investment' | 'gift' | 'refund' | 'other';
+
 export interface user_profile {
   user_id: string;
   user_name: string;
@@ -20,6 +26,7 @@ export interface expense_category {
   category_name: string;
   category_icon?: string;
   category_color?: string;
+  category_type: category_type;
   is_default: boolean;
   created_at: Date;
   updated_at: Date;
@@ -42,6 +49,18 @@ export interface user_expense {
   expense_description?: string;
   expense_date: Date;
   payment_method?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface user_income {
+  income_id: string;
+  user_id: string;
+  category_id: string;
+  income_amount: number;
+  income_description?: string;
+  income_date: Date;
+  // source_type?: income_source_type;
   created_at: Date;
   updated_at: Date;
 }
@@ -88,6 +107,7 @@ export interface create_category_request {
   category_name: string;
   category_icon?: string;
   category_color?: string;
+  category_type?: category_type;
 }
 
 export interface create_sub_category_request {
@@ -130,4 +150,32 @@ export interface analytics_query_params {
   start_date: string;
   end_date: string;
   group_by?: 'day' | 'week' | 'month';
+}
+
+// Income request types
+export interface create_income_request {
+  user_id: string;
+  category_id: string;
+  income_amount: number;
+  income_description?: string;
+  income_date: string | Date;
+  // source_type?: income_source_type;
+}
+
+export interface update_income_request {
+  category_id?: string;
+  income_amount?: number;
+  income_description?: string;
+  income_date?: string | Date;
+  // source_type?: income_source_type;
+}
+
+export interface income_query_params {
+  user_id: string;
+  start_date?: string;
+  end_date?: string;
+  category_id?: string;
+  // source_type?: income_source_type;
+  page?: number;
+  page_size?: number;
 }

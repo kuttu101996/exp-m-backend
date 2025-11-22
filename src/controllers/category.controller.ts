@@ -1,27 +1,44 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { expense_category_model, user_expense_model } from '../models';
+import { expense_category_model, user_expense_model, user_income_model } from '../models';
 import { send_success, send_error, send_not_found } from '../utils/response';
 import { find_similar_strings } from '../utils/fuzzy_match';
+import { category_type } from '../types';
 
-// Get all categories for a user
+// Get all categories for a user (with optional category_type filter)
 export const get_categories = async (req: Request, res: Response): Promise<void> => {
   try {
     const { user_id } = req.params;
+    const { category_type: type_filter } = req.query;
+
+    // Build query with optional category_type filter
+    const query: { user_id: string; category_type?: category_type } = { user_id };
+    if (type_filter && (type_filter === 'income' || type_filter === 'expense')) {
+      query.category_type = type_filter as category_type;
+    }
 
     const categories = await expense_category_model
-      .find({ user_id })
+      .find(query)
       .sort({ created_at: -1 });
 
-    // Get expense count for each category
+    // Get transaction count for each category (expense or income based on type)
     const categories_with_count = await Promise.all(
       categories.map(async (category) => {
-        const expense_count = await user_expense_model.countDocuments({
-          category_id: category.category_id,
-        });
+        let transaction_count = 0;
+
+        if (category.category_type === 'income') {
+          transaction_count = await user_income_model.countDocuments({
+            category_id: category.category_id,
+          });
+        } else {
+          transaction_count = await user_expense_model.countDocuments({
+            category_id: category.category_id,
+          });
+        }
+
         return {
           ...category.toObject(),
-          expense_count,
+          expense_count: transaction_count, // Keep field name for backward compatibility
         };
       })
     );
@@ -50,17 +67,23 @@ export const get_category_by_id = async (req: Request, res: Response): Promise<v
   }
 };
 
-// Check for similar category names
+// Check for similar category names (with optional category_type filter)
 export const check_similar_categories = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, category_name } = req.body;
+    const { user_id, category_name, category_type: type_filter } = req.body;
 
     if (!category_name || !user_id) {
       send_error(res, 'user_id and category_name are required', 'Validation error', 400);
       return;
     }
 
-    const existing_categories = await expense_category_model.find({ user_id });
+    // Build query with optional category_type filter
+    const query: { user_id: string; category_type?: category_type } = { user_id };
+    if (type_filter && (type_filter === 'income' || type_filter === 'expense')) {
+      query.category_type = type_filter as category_type;
+    }
+
+    const existing_categories = await expense_category_model.find(query);
     const existing_names = existing_categories.map((cat) => cat.category_name);
 
     const similar_matches = find_similar_strings(category_name, existing_names, 70);
@@ -77,17 +100,21 @@ export const check_similar_categories = async (req: Request, res: Response): Pro
 // Create new category
 export const create_category = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, category_name, category_icon, category_color } = req.body;
+    const { user_id, category_name, category_icon, category_color, category_type: cat_type } = req.body;
 
     if (!user_id || !category_name) {
       send_error(res, 'user_id and category_name are required', 'Validation error', 400);
       return;
     }
 
-    // Check for exact duplicate
+    // Validate category_type if provided
+    const valid_category_type = cat_type === 'income' ? 'income' : 'expense';
+
+    // Check for exact duplicate within the same category type
     const existing = await expense_category_model.findOne({
       user_id,
       category_name: { $regex: new RegExp(`^${category_name}$`, 'i') },
+      category_type: valid_category_type,
     });
 
     if (existing) {
@@ -101,6 +128,7 @@ export const create_category = async (req: Request, res: Response): Promise<void
       category_name,
       category_icon: category_icon || '📁',
       category_color: category_color || '#6366f1',
+      category_type: valid_category_type,
       is_default: false,
     });
 
